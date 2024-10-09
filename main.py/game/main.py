@@ -8,7 +8,18 @@ from sprites import *
 from tilemap import *
 from os import path 
 from random import randint
+'''
+GOALS : eat all the enemies 
+RULES : you have to get powerup to eat enemies
+FEEDBACK: If you collide with enemy before hitting powerup you die
+FREEDOM: MOve around inside game spae
 
+What setance does your game make? (mario video)
+
+When the player collides with enemy the enemy bounces off
+
+
+'''
 
 # created a game class to instantiate later
 # it will have all the necessary parts to run the game
@@ -57,6 +68,8 @@ class Game:
                     Player(self, col, row)
                 if tile == 'm':
                     Mob(self, col, row)
+                if tile == 'C':
+                    Coin(self,col,row)
 
     # using self.running as a boolean to continue running the game.-------- does the actions like draw sprites.
     def run(self):
@@ -89,7 +102,7 @@ class Game:
     def draw(self):
         self.screen.fill(WHITE)
         self.draw_text(self.screen, str(self.dt*1000), 24, BLACK, WIDTH/2, HEIGHT/2)
-        self.all_sprites.draw(self.screen)
+        self.all_sprites.draw(self.screen,"Coins collected " + str(self.player.coins), 24, WHITE, WIDTH /2, HEIGHT/24)
         pg.display.flip()
 
 # if the name of the file is main then run!
@@ -97,8 +110,8 @@ class Game:
 if __name__ == "__main__":
     g = Game()
     # create all game elements with the new method (not function)
-    # g.new()
-    # run the game
-    # g.run()
+    g.new()
+    #run the game
+    g.run()
 
         

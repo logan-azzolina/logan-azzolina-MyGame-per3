@@ -14,7 +14,14 @@ from random import randint
 GOALS : eat all the enemies 
 RULES : you have to get powerup to eat enemies
 FEEDBACK: If you collide with enemy before hitting powerup you die
-FREEDOM: MOve around inside game spae
+FREEDOM: MOve around inside game space 
+
+
+myproject
+GOALS : get to the top escaping something slowly coming from bottom mayb a storm 
+RULES : get powerups, jump, go up, dont'n fall to death
+FEEDBACK: 
+FREEDOM: 
 
 What setance does your game make? (mario video)
 
@@ -22,6 +29,7 @@ When the player collides with enemy the enemy bounces off
 
 
 '''
+
 
 # created a game class to instantiate later
 # it will have all the necessary parts to run the game

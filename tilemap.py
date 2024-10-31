@@ -1,3 +1,5 @@
+#This file was created by Logan Azzolina 
+
 import pygame as pg
 from settings import *
 
@@ -12,4 +14,3 @@ class Map:
         self.tileheight = len(self.data)
         self.width = self.tilewidth * TILESIZE
         self.height = self.tileheight * TILESIZE
-

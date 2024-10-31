@@ -1,127 +1,169 @@
-# This file was created by Logan Azzolina
-
-#anything anything 
+# # This file was created by Logan Azzolina
 
 # IMPORT ALL NECESSARY MODULES AND LIBRARIES
 import pygame as pg
-
 from settings import *
-from sprites import *
+from sprites_sidescroller import *
+# from sprites import *
 from tilemap import *
-from os import path 
+from os import path
+import sys
 from random import randint
 '''
-GOALS : eat all the enemies 
-RULES : you have to get powerup to eat enemies
-FEEDBACK: If you collide with enemy before hitting powerup you die
-FREEDOM: MOve around inside game space 
+GOALS: Eat all the enemies
+RULES: You have to get a powerup to eat enemies
+FEEDBACK: If you collide with an enemy before eating a powerup you die
+FREEDOM: Move around inside the game space
 
+What sentence does your game make? 
 
-myproject
-GOALS : get to the top escaping something slowly coming from bottom mayb a storm 
-RULES : get powerups, jump, go up, dont'n fall to death
-FEEDBACK: 
-FREEDOM: 
-
-What setance does your game make? (mario video)
-
-When the player collides with enemy the enemy bounces off
-
+When the player collides with an enemy the enemy bounces off
 
 '''
-
-
 # created a game class to instantiate later
 # it will have all the necessary parts to run the game
-#the game class is created to orginize the elements needed to create a game
-#this inlcudes the game clock which allows us to set the framerate
-class Game:
-    # init initializes all the neccesary components for the game including video and sound 
+# the game class is created to organize the elements needed to create a gam
+
+class Game: 
+    # Set up everything the game needs right when it starts, like the screen, clock, and a flag for pillars
     def __init__(self):
+        # Start up Pygame
         pg.init()
-        pg.mixer.init()
+        # Set up the display size
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        pg.display.set_caption("Logan' Game")
+        # Give the window a title
+        pg.display.set_caption("Logan's Game")
+        # Make a clock so we can control the framerate
         self.clock = pg.time.Clock()
+        # Keeps track if the game is running
         self.running = True
-        # self creates player block, creates the all_sprites group so that we can batch, update and render. defines properties that can be seen in the game system. 
-        #self creates a player block and defines classes 
+        # Flag to decide if pillars should be created
+        self.create_pillars = True
+
+    # Load any needed data for the game, like images and maps
     def load_data(self):
+        # Path to the main game folder
         self.game_folder = path.dirname(__file__)
-        self.map = Map(path.join(self. game_folder, 'level1.txt'))
+        # Folder where images are stored
+        self.img_folder = path.join(self.game_folder, 'images')
+        # Load up the map file
+        self.map = Map(path.join(self.game_folder, 'level1.txt'))
+
+    # Start a new game, setting up the map, player, enemies, etc.
     def new(self):
+        # Load in our game data (like the map)
         self.load_data()
+        # Print map data for debugging (see what’s in the map)
         print(self.map.data)
-        #following steps instanciate all the items that will be in the game system.
+        # Groups to keep track of different types of game objects
         self.all_sprites = pg.sprite.Group()
-        self.player = Player(self, 50,50)
-        # instantiated a mob
-        self.mob = Mob(self, 100,100)
-        self.wall1 = Wall(self, 100,100)
-        self.all_sprites.add(self.player)
-        self.all_sprites.add(self.mob)
-        self.all_sprites.add(self.wall1)
-        #creating for loop for how many you want of something.
-        # makes new mobs and walls using a for loop
-        for i in range(6):
-            print(i*TILESIZE)
-            w = Wall(self, i*TILESIZE, 100)
-            self.all_sprites.add(w)
-        #takes map.data and parses it usign enumerate so that we can assign x and y values to object intsnaces.
-        for row, tiles in enumerate(self.map.date):
+        self.all_walls = pg.sprite.Group()
+        self.all_mobs = pg.sprite.Group()
+
+        # Go through each row in the map file
+        for row, tiles in enumerate(self.map.data):
+            # Print row number for debugging
             print(row)
+            # Go through each tile in that row
             for col, tile in enumerate(tiles):
+                # Print column number for debugging
                 print(col)
+                # If we find a wall, add it at this spot
                 if tile == '1':
                     Wall(self, col, row)
-                if tile == 'p':
-                    Player(self, col, row)
-                if tile == 'm':
+                # If there's an enemy mob, add it here
+                if tile == 'M':
                     Mob(self, col, row)
-                if tile == 'C':
-                    Coin(self,col,row)
+                # If we find the player start position, place the player here
+                if tile == 'P':
+                    self.player = Player(self, col, row)
 
-    # using self.running as a boolean to continue running the game.-------- does the actions like draw sprites.
+    # Actually run the game
     def run(self):
+        # Set the game to a running state
+        self.running = True
+        # Main game loop
         while self.running:
+            # Keep track of time between frames (delta time)
             self.dt = self.clock.tick(FPS) / 1000
+            # Check for input
             self.events()
+            # Update all objects
             self.update()
+            # Draw everything on screen
             self.draw()
-        # input 
-    #Looks for any event, and specifically looks for closing the game with 'x'.
-    def events(self):
-        for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    self.running = False
 
-        # pg.quit()
-        # process
-    # constantly checking for updates for the group of sprites. 
+    # Quit the game and close Pygame
+    def quit(self):
+        # Close Pygame
+        pg.quit()
+        # Close out the game entirely
+        sys.exit()
+
+    # Check for events like closing the game window
+    def events(self):
+        # Go through all events
+        for event in pg.event.get():
+            # If the user clicks the close button, stop the game
+            if event.type == pg.QUIT:
+                self.running = False
+
+    # Update all game objects and check for game-over conditions
     def update(self):
+        # Update all sprites (like player, enemies, etc.)
         self.all_sprites.update()
-        # output
-    def draw_text(self, surface,text, size, color, x, y):
+        # If player health is zero or less, end the game
+        if self.player.health <= 0:
+            self.running = False
+
+    # Draw text to the screen (like for displaying time, score, etc.)
+    def draw_text(self, surface, text, size, color, x, y):
+        # Find an arial font
         font_name = pg.font.match_font('arial')
+        # Set up the font size and color
         font = pg.font.Font(font_name, size)
+        # Render the text to a surface
         text_surface = font.render(text, True, color)
+        # Get a rectangle for the text
         text_rect = text_surface.get_rect()
-        text_rect.midtop = (x,y)
+        # Position it in the middle of the top of the specified location
+        text_rect.midtop = (x, y)
+        # Draw the text surface on the screen
         surface.blit(text_surface, text_rect)
-    # drawing out whats on the screen like the fill color. 
+
+    # Draw all game graphics to the screen
     def draw(self):
+        # Fill the screen with a color (white)
         self.screen.fill(WHITE)
-        self.draw_text(self.screen, str(self.dt*1000), 24, BLACK, WIDTH/2, HEIGHT/2)
-        self.all_sprites.draw(self.screen,"Coins collected " + str(self.player.coins), 24, WHITE, WIDTH /2, HEIGHT/24)
+        # Draw all sprites to the screen
+        self.all_sprites.draw(self.screen)
+        # Draw the timer at a specific spot
+        self.draw_text(self.screen, str(pg.time.get_ticks()), 24, WHITE, WIDTH / 30, HEIGHT / 30)
+        # Update the display with new graphics
         pg.display.flip()
 
-# if the name of the file is main then run!
-#checks file name and creates a game object
-if __name__ == "__main__":
-    g = Game()
-    # create all game elements with the new method (not function)
-    g.new()
-    #run the game
-    g.run()
+    # Pause the game until a key is pressed
+    def wait_for_key(self):
+        # Flag to stay in this loop until a key is pressed
+        waiting = True
+        while waiting:
+            # Keep the framerate steady while waiting
+            self.clock.tick(FPS)
+            # Go through each event while waiting
+            for event in pg.event.get():
+                # If user quits, stop waiting and quit the game
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.quit()
+                # If any key is released, stop waiting
+                if event.type == pg.KEYUP:
+                    waiting = False
 
-        
+# Make a game object and run the game
+if __name__ == "__main__":
+    # Create an instance of the Game class
+    g = Game()
+    # Set up the game elements
+    g.new()
+    # Run the game loop
+    g.run()

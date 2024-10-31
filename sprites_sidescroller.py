@@ -1,4 +1,5 @@
-# #this file was created by Logan Azzolina
+# #This file was created by logan azzolina
+
 import pygame as pg
 from pygame.sprite import Sprite
 from settings import *

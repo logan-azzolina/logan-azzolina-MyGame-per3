@@ -8,115 +8,133 @@ import random
 vec = pg.math.Vector2
 
 class Player(Sprite):
+    # initializes the player with the game reference and starting pos
     def __init__(self, game, x, y):
-        self.game = game
-        self.groups = game.all_sprites
-        Sprite.__init__(self, self.groups)
+        self.game = game  # save the game reference
+        self.groups = game.all_sprites  # put player in all_sprites group
+        Sprite.__init__(self, self.groups)  # init the sprite
+        
+        # create the player image square
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.rect = self.image.get_rect()
-        self.image.fill(RED)
-        self.pos = vec(x*TILESIZE, y*TILESIZE)
-        self.vel = vec(0,0)
-        self.acc = vec(0,0)
-        self.speed = 5
-        self.jumping = False
-        self.jump_power = 15
-        self.coins = 0
-        self.health = 10
+        self.rect = self.image.get_rect()  # get the rectangle area of image
+        self.image.fill(RED)  # make player red
+        
+        # set up the starting position and movement vectors
+        self.pos = vec(x * TILESIZE, y * TILESIZE)
+        self.vel = vec(0, 0)  # velocity starts at 0
+        self.acc = vec(0, 0)  # acceleration starts at 0
+        self.speed = 5  # speed to control movement
+        self.jumping = False  # player not jumping yet
+        self.jump_power = 8  # how high the player can jump
+        # self.coins = 0  # coins start at 0
+        self.health = 10  # starting health
+
+    # check keys pressed for movement
     def get_keys(self):
-        keys = pg.key.get_pressed()
-        if keys[pg.K_w]:
+        keys = pg.key.get_pressed()  # get key states
+        if keys[pg.K_w]:  # if W, move up
             self.vel.y -= self.speed
-        if keys[pg.K_a]:
+        if keys[pg.K_a]:  # if A, move left
             self.vel.x -= self.speed
-        if keys[pg.K_d]:
+        if keys[pg.K_d]:  # if D, move right
             self.vel.x += self.speed
-        if keys[pg.K_SPACE]:
+        if keys[pg.K_SPACE]:  # if SPACE, jump
             self.jump()
+
+    # define jumping class
     def jump(self):
-        self.rect.y += 2
-        hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
-        self.rect.y -= 2
-        if hits and not self.jumping:
-            self.jumping = True
-            self.vel.y = -self.jump_power
+        self.rect.y += 2  # move down a bit to check collision
+        hits = pg.sprite.spritecollide(self, self.game.all_walls, False)  # check if we hit ground
+        self.rect.y -= 2  # move back
+        if hits and not self.jumping:  # if touching ground and not already jumping
+            self.jumping = True  # start the jump
+            self.vel.y = -self.jump_power  # jump up
             print("trying to jump")
+
+    # handle collision with walls in x and y directions
     def collide_with_walls(self, dir):
-        if dir == 'x':
+        if dir == 'x':  # checking x direction collision
             hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
             if hits:
-                if self.vel.x > 0:
+                if self.vel.x > 0:  # moving right
                     self.pos.x = hits[0].rect.left - TILESIZE
-                    # self.x = hits[0].rect.left - self.rect.width
-                if self.vel.x < 0:
+                if self.vel.x < 0:  # moving left
                     self.pos.x = hits[0].rect.right
-                self.vel.x = 0
+                self.vel.x = 0  # stop horizontal movement
                 self.rect.x = self.pos.x
-        if dir == 'y':
+        if dir == 'y':  # checking y direction collision
             hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
             if hits:
-                if self.vel.y > 0:
+                if self.vel.y > 0:  # falling down
                     self.pos.y = hits[0].rect.top - TILESIZE
-                    self.jumping = False
-                    # self.y = hits[0].rect.top - self.rect.height
-                if self.vel.y < 0:
+                    self.jumping = False  # stop jumping
+                if self.vel.y < 0:  # moving up
                     self.pos.y = hits[0].rect.bottom
-                self.vel.y = 0
+                self.vel.y = 0  # stop vertical movement
                 self.rect.y = self.pos.y
-                
+
+    # check collision with any sprite in the group
     def collide_with_stuff(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
-            if str(hits[0].__class__.__name__) == "Mob":
+            if str(hits[0].__class__.__name__) == "Mob":  # check if hit a Mob
                 print("i hit a mob...")
 
+    # update player position and handle friction
     def update(self):
-        self.acc = vec(0, GRAVITY)
-        self.get_keys()
-        self.acc.x += self.vel.x * FRICTION
-        self.vel += self.acc 
-        # when very low velocity is achieved - set it to zero to prevent jiggling
-        if abs(self.vel.x) < 0.1:
+        self.acc = vec(0, GRAVITY)  # apply gravity
+        self.get_keys()  # check keys
+        self.acc.x += self.vel.x * FRICTION  # add friction
+        self.vel += self.acc  # update velocity with acceleration
+        
+        if abs(self.vel.x) < 0.1:  # stop any tiny movement
             self.vel.x = 0
-        self.pos += self.vel + 0.5 * self.acc
-        self.rect.x = self.pos.x
-        self.collide_with_walls('x')
-        self.rect.y = self.pos.y
-        self.collide_with_walls('y')
-        self.collide_with_stuff(self.game.all_mobs, False)
+        self.pos += self.vel + 0.5 * self.acc  # update position
+        self.rect.x = self.pos.x  # update rect x
+        self.collide_with_walls('x')  # check x collision
+        self.rect.y = self.pos.y  # update rect y
+        self.collide_with_walls('y')  # check y collision
+        self.collide_with_stuff(self.game.all_mobs, False)  # check mob collision
+
 
 class Mob(Sprite):
+    # init mob, with game ref and position
     def __init__(self, game, x, y):
-        self.game = game
-        self.groups = game.all_sprites, game.all_mobs
-        Sprite.__init__(self, self.groups)
+        self.game = game  # store game reference
+        self.groups = game.all_sprites, game.all_mobs  # put mob in all_sprites and all_mobs
+        Sprite.__init__(self, self.groups)  # init sprite
+        
+        # create mob image
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.rect = self.image.get_rect()
-        self.image.fill(GREEN)
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
-        self.speed = 10
-        # self.category = random.choice([0,1])
+        self.image.fill(GREEN)  # make it green
+        self.rect.x = x * TILESIZE  # set x pos
+        self.rect.y = y * TILESIZE  # set y pos
+        self.speed = 10  # speed of mob
+
+    # update mob position
     def update(self):
-        self.rect.x += self.speed
-        # checks to see if mob hits any wall
-        hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
-        # when it hits the side of the screen, it will move down
+        self.rect.x += self.speed  # move in x
+        hits = pg.sprite.spritecollide(self, self.game.all_walls, False)  # check wall collision
         if hits:
-            # makes it negative if it is positive and positive if it is negative
-            self.speed *= -1
-            self.rect.y += TILESIZE*2
+            self.speed *= -1  # reverse direction
+            self.rect.y += TILESIZE * 2  # move down
+
 
 class Wall(Sprite):
+    # init wall with game ref and position
     def __init__(self, game, x, y):
-        self.game = game
-        self.groups = game.all_sprites, game.all_walls
-        Sprite.__init__(self, self.groups)
+        self.game = game  # store game ref
+        self.groups = game.all_sprites, game.all_walls  # add to all_sprites and all_walls
+        Sprite.__init__(self, self.groups)  # init sprite
+        
+        # create wall image
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.rect = self.image.get_rect()
-        self.image.fill(BLUE)
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
+        self.image.fill(BLUE)  # make wall blue
+        self.rect.x = x * TILESIZE  # set x pos
+        self.rect.y = y * TILESIZE  # set y pos
 
+    # walls don’t need to update
     def update(self):
-        pass
+        pass  

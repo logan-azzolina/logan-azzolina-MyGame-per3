@@ -121,3 +121,4 @@ if __name__ == "__main__":
     g = Game()  # create the game object
     g.new()  # initialize the game elements
     g.run()  # start the game loop
+    pg.quit

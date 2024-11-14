@@ -47,7 +47,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()  # group for all sprites
         self.all_walls = pg.sprite.Group()  # group for wall sprites
         self.all_mobs = pg.sprite.Group()  # group for mob sprites
-
+        
         # Loops through the map data to create walls, mobs, player at specified spots
         #setting the code for the level 1 text
         for row, tiles in enumerate(self.map.data):
@@ -122,3 +122,4 @@ if __name__ == "__main__":
     g.new()  # initialize the game elements
     g.run()  # start the game loop
     pg.quit
+    

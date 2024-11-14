@@ -136,5 +136,5 @@ class Wall(Sprite):
         self.rect.y = y * TILESIZE  # set y pos
 
     # walls don’t need to update
-    def update(self):
-        pass  
+        def update(self):
+            pass  

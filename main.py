@@ -58,6 +58,8 @@ class Game:
                     Wall(self, col, row)
                 if tile == 'M':  # if tile is mob
                     Mob(self, col, row)
+                if tile == 'B':  # if tile is mob
+                    Barrel(self, col, row)
                 if tile == 'P':  # if tile is player
                     self.player = Player(self, col, row)
 

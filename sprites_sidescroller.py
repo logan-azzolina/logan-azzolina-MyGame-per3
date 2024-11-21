@@ -25,7 +25,7 @@ class Player(Sprite):
         self.acc = vec(0, 0)  # acceleration starts at 0
         self.speed = 5  # speed to control movement
         self.jumping = False  # player not jumping yet
-        self.jump_power = 8  # how high the player can jump
+        self.jump_power = 1  # how high the player can jump
         # self.coins = 0  # coins start at 0
         self.health = 10  # starting health
 
@@ -77,8 +77,9 @@ class Player(Sprite):
     def collide_with_stuff(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
-            if str(hits[0].__class__.__name__) == "Mob":  # check if hit a Mob
-                print("i hit a mob...")
+            if str(hits[0].__class__.__name__) == "Barrel":  # check if hit a Barrel
+                print("i hit a Barrel...")
+                self.game.quit()
 
     # update player position and handle friction
     def update(self):
@@ -86,7 +87,6 @@ class Player(Sprite):
         self.get_keys()  # check keys
         self.acc.x += self.vel.x * FRICTION  # add friction
         self.vel += self.acc  # update velocity with acceleration
-        
         if abs(self.vel.x) < 0.1:  # stop any tiny movement
             self.vel.x = 0
         self.pos += self.vel + 0.5 * self.acc  # update position
@@ -119,7 +119,61 @@ class Mob(Sprite):
         if hits:
             self.speed *= -1  # reverse direction
             self.rect.y += TILESIZE * 2  # move down
+#setup barrel to have similar physics to player allowing for gravity 
+class Barrel(Sprite):       
+    # init mob, with game ref and position
+    def __init__(self, game, x, y):
+        self.game = game  # store game reference
+        self.groups = game.all_sprites, game.all_mobs  # put mob in all_sprites and all_mobs
+        Sprite.__init__(self, self.groups)  # init sprite
+        
+        # create mob image
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.rect = self.image.get_rect()
+        self.image.fill(GREEN)  # make it green
+        self.pos = vec(x*TILESIZE, y*TILESIZE)
+        self.vel = vec(0,0)
+        self.acc = vec(0,0)
+        self.speed = -1
 
+    def collide_with_walls(self, dir):
+        if dir == 'x':  # checking x direction collision
+            hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+            if hits:
+                if self.vel.x > 0:  # moving right
+                    self.pos.x = hits[0].rect.left - TILESIZE
+                    self.speed *= -1   # if hit wall from left switch firection by reversing speed
+                if self.vel.x < 0:  # moving left
+                    self.pos.x = hits[0].rect.right
+                    self.speed *= -1    # if hit wall from right switch firection by reversing speed
+                self.vel.x = 0  # stop horizontal movement
+                self.rect.x = self.pos.x
+        if dir == 'y':  # checking y direction collision
+            hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+            if hits:
+                if self.vel.y > 0:  # falling down
+                    self.pos.y = hits[0].rect.top - TILESIZE
+                   
+                if self.vel.y < 0:  # moving up
+                    self.pos.y = hits[0].rect.bottom
+                self.vel.y = 0  # stop vertical movement
+                self.rect.y = self.pos.y
+
+    
+        
+    # update mob position
+    def update(self):
+        self.acc = vec(self.speed, GRAVITY)
+        self.acc.x += self.vel.x * FRICTION
+        self.vel += self.acc
+        if abs(self.vel.x) < .1:
+            self.vel.x = 0
+        self.pos += self.vel + 0.5 * self.acc
+        self.rect.x = self.pos.x
+        self.collide_with_walls('x')
+        self.rect.y = self.pos.y
+        self.collide_with_walls('y')
+        
 
 class Wall(Sprite):
     # init wall with game ref and position
@@ -138,3 +192,4 @@ class Wall(Sprite):
     # walls don’t need to update
         def update(self):
             pass  
+

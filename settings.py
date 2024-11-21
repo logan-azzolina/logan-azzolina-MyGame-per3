@@ -1,6 +1,7 @@
 WIDTH = 1024
 HEIGHT = 800
 
+ 
 GRAVITY = 0.8
 FRICTION = -0.12
 
@@ -18,5 +19,5 @@ YELLOW = (255, 255, 0)
 
 COINS = 0
 
-
+Brown = (123, 63, 0)
 

@@ -7,12 +7,12 @@ import random
 
 vec = pg.math.Vector2
 
-class Player(Sprite):
+class Player(Sprite): ## This class defines the player character, managing their movement, jumping, and interaction with the environment.
     # initializes the player with the game reference and starting pos
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y): ## Here, we set up the player’s position, visual appearance, initial movement properties, and health.
         self.game = game  # save the game reference
         self.groups = game.all_sprites  # put player in all_sprites group
-        Sprite.__init__(self, self.groups)  # init the sprite
+        Sprite.__init__(self, self.groups)  # initiate the sprite
         
         # create the player image square
         self.image = pg.Surface((TILESIZE, TILESIZE))
@@ -30,7 +30,7 @@ class Player(Sprite):
         self.health = 10  # starting health
 
     # check keys pressed for movement
-    def get_keys(self):
+    def get_keys(self): ## This method checks which keys are being pressed (WASD for movement and space for jumping) and updates the player's movement.
         keys = pg.key.get_pressed()  # get key states
         if keys[pg.K_w]:  # if W, move up
             self.vel.y -= self.speed
@@ -42,7 +42,7 @@ class Player(Sprite):
             self.jump()
 
     # define jumping class
-    def jump(self):
+    def jump(self): ## In this block, we check if the player is grounded and then apply the physics needed for jumping.
         self.rect.y += 2  # move down a bit to check collision
         hits = pg.sprite.spritecollide(self, self.game.all_walls, False)  # check if we hit ground
         self.rect.y -= 2  # move back
@@ -52,7 +52,7 @@ class Player(Sprite):
             print("trying to jump")
 
     # handle collision with walls in x and y directions
-    def collide_with_walls(self, dir):
+    def collide_with_walls(self, dir):  ## This part checks for collisions with walls in either the x or y direction and adjusts the player’s position accordingly.
         if dir == 'x':  # checking x direction collision
             hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
             if hits:
@@ -74,7 +74,7 @@ class Player(Sprite):
                 self.rect.y = self.pos.y
 
     # check collision with any sprite in the group
-    def collide_with_stuff(self, group, kill):
+    def collide_with_stuff(self, group, kill):  ## Here, we check if the player collides with any other objects (like barrels), and if so, handle the interaction (like quitting the game).
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
             if str(hits[0].__class__.__name__) == "Barrel":  # check if hit a Barrel
@@ -82,7 +82,7 @@ class Player(Sprite):
                 self.game.quit()
 
     # update player position and handle friction
-    def update(self):
+    def update(self):   ## In this method, we update the player's position based on velocity and gravity, and check for any wall collisions that might change their position.
         self.acc = vec(0, GRAVITY)  # apply gravity
         self.get_keys()  # check keys
         self.acc.x += self.vel.x * FRICTION  # add friction
@@ -128,21 +128,21 @@ class Barrel(Sprite):
         Sprite.__init__(self, self.groups)  # init sprite
         
         # create mob image
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.rect = self.image.get_rect()
+        self.image = pg.Surface((TILESIZE, TILESIZE))   
+        self.rect = self.image.get_rect()   # Get the rectangle for collision and positioning
         self.image.fill(GREEN)  # make it green
-        self.pos = vec(x*TILESIZE, y*TILESIZE)
-        self.vel = vec(0,0)
-        self.acc = vec(0,0)
-        self.speed = -1
+        self.pos = vec(x*TILESIZE, y*TILESIZE)  # Position the barrel in the game space
+        self.vel = vec(0,0) # Initial velocity (stationary at first)
+        self.acc = vec(0,0) # Acceleration is zero initially
+        self.speed = -1  # Set the initial speed for horizontal movement
 
     def collide_with_walls(self, dir):
         if dir == 'x':  # checking x direction collision
-            hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+            hits = pg.sprite.spritecollide(self, self.game.all_walls, False)    #set hits for if else statement 
             if hits:
-                if self.vel.x > 0:  # moving right
-                    self.pos.x = hits[0].rect.left - TILESIZE
-                    self.speed *= -1   # if hit wall from left switch firection by reversing speed
+                if self.vel.x > 0:  # moving right 
+                    self.pos.x = hits[0].rect.left - TILESIZE   # Stop at the left edge of the wall
+                    self.speed *= -1   # if hit wall from left switch direction by reversing speed
                 if self.vel.x < 0:  # moving left
                     self.pos.x = hits[0].rect.right
                     self.speed *= -1    # if hit wall from right switch firection by reversing speed
@@ -163,16 +163,16 @@ class Barrel(Sprite):
         
     # update mob position
     def update(self):
-        self.acc = vec(self.speed, GRAVITY)
-        self.acc.x += self.vel.x * FRICTION
-        self.vel += self.acc
-        if abs(self.vel.x) < .1:
+        self.acc = vec(self.speed, GRAVITY)  # Set acceleration with gravity
+        self.acc.x += self.vel.x * FRICTION  # Apply friction to horizontal movement
+        self.vel += self.acc  # Update velocity with acceleration
+        if abs(self.vel.x) < .1:  # If velocity is very small, stop moving horizontally
             self.vel.x = 0
-        self.pos += self.vel + 0.5 * self.acc
-        self.rect.x = self.pos.x
-        self.collide_with_walls('x')
-        self.rect.y = self.pos.y
-        self.collide_with_walls('y')
+        self.pos += self.vel + 0.5 * self.acc  # Update position based on velocity and acceleration
+        self.rect.x = self.pos.x  # Update horizontal position
+        self.collide_with_walls('x')  # Check for horizontal collisions
+        self.rect.y = self.pos.y  # Update vertical position
+        self.collide_with_walls('y')  # Check for vertical collisions
         
 
 class Wall(Sprite):

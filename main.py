@@ -37,6 +37,17 @@ class Game:
     # Load game assets and other data, like images and maps
     def load_data(self):
         self.game_folder = path.dirname(__file__)  # game folder path
+        #load high score file
+        with open('HS_file', 'w') as files:
+            f.write("High score FIle!") #write some text to the file
+
+        print("file created and written succesfully.")
+
+        with open(path.join(self.dir, HS_FILE), 'r') as f:
+            try:
+                self.highscore = int(f.read())
+            except:
+                self.highscore = 0
         self.img_folder = path.join(self.game_folder, 'images')  # image folder path
         self.map = Map(path.join(self.game_folder, 'level1.txt'))  # load the map file
 
@@ -46,7 +57,7 @@ class Game:
         print(self.map.data)  # prints map data for debug
         self.all_sprites = pg.sprite.Group()  # group for all sprites
         self.all_walls = pg.sprite.Group()  # group for wall sprites
-        self.all_mobs = pg.sprite.Group()  # group for mob sprites
+        self.all_mobs = pg.sprite.Group()  # group for mob spritesddddw
         
         # Loops through the map data to create walls, mobs, player at specified spots
         #setting the code for the level 1 text
@@ -58,7 +69,7 @@ class Game:
                     Wall(self, col, row)
                 if tile == 'M':  # if tile is mob
                     Mob(self, col, row)
-                if tile == 'B':  # if tile is mob
+                if tile == 'B':  # if tile is Barrel
                     Barrel(self, col, row)
                 if tile == 'P':  # if tile is player
                     self.player = Player(self, col, row)
@@ -81,6 +92,12 @@ class Game:
     # handle all in-game events, checks if the window is closed
     def events(self):
         for event in pg.event.get():  # loop through events
+            if self.score > self.highscore:
+                self.highscore > self.score
+                self.highscore = self.score
+                with open('HS_file', 'w') as files:
+                    f.write("High score FIle!") #write some text to the file
+
             if event.type == pg.QUIT:  # if window's closed
                 self.running = False  # stop running
 

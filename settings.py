@@ -21,3 +21,4 @@ COINS = 0
 
 Brown = (123, 63, 0)
 
+HS_FILE = "highscore.txt"

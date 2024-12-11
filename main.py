@@ -37,43 +37,71 @@ class Game:
     # Load game assets and other data, like images and maps
     def load_data(self):
         self.game_folder = path.dirname(__file__)  # game folder path
-        #load high score file
-        with open('HS_file', 'w') as files:
-            f.write("High score FIle!") #write some text to the file
+        # #load high score file
+        # with open('HS_file', 'w') as files:
+        #     f.write("High score FIle!") #write some text to the file
 
-        print("file created and written succesfully.")
+        # print("file created and written succesfully.")
 
-        with open(path.join(self.dir, HS_FILE), 'r') as f:
-            try:
-                self.highscore = int(f.read())
-            except:
-                self.highscore = 0
+        # with open(path.join(self.dir, HS_FILE), 'r') as f:
+        #     try:
+        #         self.highscore = int(f.read())
+        #     except:
+        #         self.highscore = 0
         self.img_folder = path.join(self.game_folder, 'images')  # image folder path
         self.map = Map(path.join(self.game_folder, 'level1.txt'))  # load the map file
 
     # Sets up a new game, resets the sprites and other things
-    def new(self):
-        self.load_data()  # loads all data for the game
-        print(self.map.data)  # prints map data for debug
-        self.all_sprites = pg.sprite.Group()  # group for all sprites
-        self.all_walls = pg.sprite.Group()  # group for wall sprites
-        self.all_mobs = pg.sprite.Group()  # group for mob spritesddddw
-        
-        # Loops through the map data to create walls, mobs, player at specified spots
-        #setting the code for the level 1 text
-        for row, tiles in enumerate(self.map.data):
-            print(row)  # prints row for debug
-            for col, tile in enumerate(tiles):
-                print(col)  # prints col for debug
-                if tile == '1':  # if tile is wall
-                    Wall(self, col, row)
-                if tile == 'M':  # if tile is mob
-                    Mob(self, col, row)
-                if tile == 'B':  # if tile is Barrel
-                    Barrel(self, col, row)
-                if tile == 'P':  # if tile is player
-                    self.player = Player(self, col, row)
+    # def new(self):
+    #     self.load_data()  # loads all data for the game
+    #     print(self.map.data)  # prints map data for debug
+    #     self.all_sprites = pg.sprite.Group()  # group for all sprites
+    #     self.all_walls = pg.sprite.Group()  # group for wall sprites
+    #     self.all_mobs = pg.sprite.Group()  # group for mob spritesddddw
+    #     self.all_dk 
+    #     self.groups = Game.all_sprites, Game.all_dk
+    #     Sprite.__init__(self, self.groups)
 
+
+        
+    #     # Loops through the map data to create walls, mobs, player at specified spots
+    #     #setting the code for the level 1 text
+    #     for row, tiles in enumerate(self.map.data):
+    #         print(row)  # prints row for debug
+    #         for col, tile in enumerate(tiles):
+    #             print(col)  # prints col for debug
+    #             if tile == '1':  # if tile is wall
+    #                 Wall(self, col, row)
+    #             if tile == 'M':  # if tile is mob
+    #                 Mob(self, col, row)
+    #             if tile == 'B':  # if tile is Barrel
+    #                 Barrel(self, col, row)
+    #             if tile == 'P':  # if tile is player
+    #                 self.player = Player(self, col, row)
+    #             if tile == 'K':
+    #                 DonkeyKong(self, col, row)
+    def new(self):
+        self.load_data()
+        self.all_sprites = pg.sprite.Group()
+        self.all_walls = pg.sprite.Group()
+        self.all_mobs = pg.sprite.Group()
+        self.all_dk = pg.sprite.Group()
+
+    # Loop through map data to create objects
+        for row, tiles in enumerate(self.map.data):
+            for col, tile in enumerate(tiles):
+                if tile == '1':
+                    Wall(self, col, row)
+                if tile == 'M':
+                    Mob(self, col, row)
+                if tile == 'B':
+                    Barrel(self, col, row)
+                if tile == 'P':
+                    self.player = Player(self, col, row)
+                if tile == 'K':  # Add Donkey Kong to the game
+                    DonkeyKong(self, col, row)
+
+                    
     # main game loop to keep the game going while running is True
     def run(self):
         self.running = True  # start running
@@ -92,11 +120,11 @@ class Game:
     # handle all in-game events, checks if the window is closed
     def events(self):
         for event in pg.event.get():  # loop through events
-            if self.score > self.highscore:
-                self.highscore > self.score
-                self.highscore = self.score
-                with open('HS_file', 'w') as files:
-                    f.write("High score FIle!") #write some text to the file
+            # if self.score > self.highscore:
+            #     self.highscore > self.score
+            #     self.highscore = self.score
+            #     with open('HS_file', 'w') as files:
+            #         f.write("High score FIle!") #write some text to the file
 
             if event.type == pg.QUIT:  # if window's closed
                 self.running = False  # stop running
@@ -106,6 +134,10 @@ class Game:
         self.all_sprites.update()  # update every sprite in the game
         if self.player.health <= 0:  # if player health reaches zero = game ends 
             self.running = False  # game ends
+        if pg.sprite.spritecollide(self.player, self.all_dk, False):
+            print("You reached Donkey Kong! You win!")
+            self.running = False
+
 
     # Draws text to the screen
     def draw_text(self, surface, text, size, color, x, y):

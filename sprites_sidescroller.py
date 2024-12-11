@@ -80,6 +80,11 @@ class Player(Sprite): ## This class defines the player character, managing their
             if str(hits[0].__class__.__name__) == "Barrel":  # check if hit a Barrel
                 print("i hit a Barrel...")
                 self.game.quit()
+    def collide_with_dk(self):
+        hits = pg.sprite.spritecollide(self, self.game.all_dk, False)
+        if hits:
+            print("You win!")  # Replace with actual win logic
+            self.game.running = False  # Stop the game or trigger a win screen
 
     # update player position and handle friction
     def update(self):   ## In this method, we update the player's position based on velocity and gravity, and check for any wall collisions that might change their position.
@@ -95,7 +100,7 @@ class Player(Sprite): ## This class defines the player character, managing their
         self.rect.y = self.pos.y  # update rect y
         self.collide_with_walls('y')  # check y collision
         self.collide_with_stuff(self.game.all_mobs, False)  # check mob collision
-
+        self.collide_with_dk()
 
 class Mob(Sprite):
     # init mob, with game ref and position
@@ -192,4 +197,16 @@ class Wall(Sprite):
     # walls don’t need to update
         def update(self):
             pass  
+class DonkeyKong(Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self.groups = game.all_sprites, game.all_dk
+        Sprite.__init__(self, self.groups)
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(YELLOW)  # Make Donkey Kong yellow
+        self.rect = self.image.get_rect()
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
 
+        def update(self):
+            pass 
